@@ -1,108 +1,93 @@
 <template>
-    <div class="report-wrapper shadow border">
-        <!-- Header Summary Controls -->
-        <div class="p-3 bg-white border-bottom d-flex align-items-center justify-content-between">
-            <div class="d-flex gap-3 align-items-center">
-                <div class="input-group input-group-sm w-auto">
-                    <span class="input-group-text bg-light fw-bold">Month</span>
-                    <input type="month" v-model="filterMonth" class="form-control" @change="fetchReportData">
-                </div>
-                <h5 class="mb-0 fw-bold text-dark">Master Efficiency Report (All Units)</h5>
+    <div class="report-wrapper p-3">
+        <!-- Filter Controls -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex gap-2 align-items-center">
+                <label class="fw-bold">Month:</label>
+                <input type="month" v-model="filterMonth" class="form-control form-control-sm w-auto"
+                    @change="fetchReportData">
             </div>
-            <button class="btn btn-sm btn-primary" @click="fetchReportData">
-                Refresh All Data
-            </button>
+            <h5 class="mb-0 fw-bold">MONTHLY EFFICIENCY & HP% REPORT</h5>
+            <button class="btn btn-sm btn-primary" @click="fetchReportData">Refresh</button>
         </div>
 
         <div class="report-container">
-            <table class="report-table table table-hover table-bordered">
+            <table class="table table-bordered text-center mb-0">
                 <thead class="sticky-header">
-                    <tr class="header-row-1">
-                        <th rowspan="2" class="sticky-col">Line</th>
-                        <th colspan="3" class="sticky-col">Monthly Manpower</th>
-                        <th rowspan="2">Working Day</th>
+                    <tr class="header-main">
+                        <th rowspan="2">Line</th>
+                        <th colspan="4">Attendance (Manpower)</th>
+                        <th rowspan="2">Days</th>
                         <th rowspan="2">Target</th>
                         <th rowspan="2">Actual</th>
-                        <th rowspan="2">Shortage</th>
-                        <th colspan="2">Efficiency</th>
-                        <th rowspan="2">Avg SMV</th>
-                        <th colspan="3">Earnings</th>
-                        <th colspan="4" class="cost-header">Line Cost</th>
+                        <th rowspan="2">Variance</th>
+                        <th rowspan="2">Eff %</th>
                     </tr>
-                    <tr class="header-row-2">
-                        <th class="sticky-col manpower-sub">OP</th>
-                        <th class="sticky-col manpower-sub">HP</th>
-                        <th class="sticky-col manpower-sub">Total</th>
-                        <th>Target</th>
-                        <th>Actual</th>
+                    <tr class="header-sub">
+                        <th>OP</th>
+                        <th>HP</th>
+                        <th>HP %</th>
                         <th>Total</th>
-                        <th>Avg</th>
-                        <th>Per HP</th>
-                        <th>Target</th>
-                        <th>Actual</th>
-                        <th>Belt</th>
-                        <th>Low Cost</th>
+
                     </tr>
                 </thead>
 
-                <!-- Outer Loop: Iterate through every Unit Group -->
                 <tbody v-for="(lines, unitName) in unitGroups" :key="unitName">
-                    <tr class="unit-divider">
-                        <td colspan="18" class="text-start ps-3 fw-bold text-uppercase">
-                            <i class="bi bi-building me-2"></i>Unit: {{ unitName }}
-                        </td>
+                    <!-- Unit Divider -->
+                    <tr class="unit-row">
+                        <td colspan="10" class="text-start ps-3 fw-bold">UNIT: {{ unitName }}</td>
                     </tr>
 
-                    <!-- Inner Loop: Show all Lines for this specific Unit -->
-                    <tr v-for="line in lines" :key="line.id">
-                        <td class="sticky-col first-col line-no">{{ line.line_no }}</td>
-                        <td class="sticky-col manpower-cell">{{ line.op }}</td>
-                        <td class="sticky-col manpower-cell">{{ line.hp }}</td>
-                        <td class="sticky-col manpower-cell total-bg">{{ Number(line.op || 0) + Number(line.hp || 0) }}
+                    <!-- Line Data -->
+                    <tr v-for="line in lines" :key="line.line_no">
+                        <td class="fw-bold bg-light">{{ line.line_no }}</td>
+                        <td>{{ line.op || 0 }}</td>
+                        <td>{{ line.hp || 0 }}</td>
+                        <td class="fw-bold text-primary">{{ calcHpPerc(line.op, line.hp) }}%</td>
+                        <td class="fw-bold">{{ Number(line.op || 0) + Number(line.hp || 0) }}</td>
+                        <!-- HP Percentage Line-wise -->
+
+
+                        <td>{{ line.working_days }}</td>
+                        <td>{{ line.target }}</td>
+                        <td>{{ line.actual }}</td>
+                        <td :class="line.actual < line.target ? 'text-danger' : 'text-success'">
+                            {{ line.actual - line.target }}
                         </td>
-                        <td>{{ line.working_days || 0 }}</td>
-                        <td>{{ line.target || 0 }}</td>
-                        <td>{{ line.actual || 0 }}</td>
-                        <td :class="(line.actual - line.target) < 0 ? 'text-danger' : ''">
-                            {{ (line.actual || 0) - (line.target || 0) }}
-                        </td>
-                        <td>{{ line.target_eff || 0 }}%</td>
-                        <td class="fw-bold">{{ calcEff(line) }}%</td>
-                        <td>{{ line.avg_smv || 0 }}</td>
-                        <td>${{ line.total_earn || 0 }}</td>
-                        <td>${{ line.avg_earn || 0 }}</td>
-                        <td>${{ line.per_hp_earn || 0 }}</td>
-                        <td>${{ line.target_cost || 0 }}</td>
-                        <td>${{ line.actual_cost || 0 }}</td>
-                        <td>${{ line.belt_cost || 0 }}</td>
-                        <td class="fw-bold text-success">${{ line.low_cost || 0 }}</td>
+                        <td class="fw-bold">{{ calcEff(line.actual, line.target) }}%</td>
                     </tr>
 
-                    <!-- Unit-Wise Footer Totals -->
+                    <!-- Unit Sub-Total -->
                     <tr class="unit-total-row">
-                        <td colspan="5" class="text-end pe-3 fw-bold">Unit {{ unitName }} Total:</td>
-                        <td>{{ getUnitTotal(lines, 'target') }}</td>
-                        <td>{{ getUnitTotal(lines, 'actual') }}</td>
-                        <td
-                            :class="(getUnitTotal(lines, 'actual') - getUnitTotal(lines, 'target')) < 0 ? 'text-danger' : ''">
-                            {{ getUnitTotal(lines, 'actual') - getUnitTotal(lines, 'target') }}
-                        </td>
+                        <td class="text-end fw-bold">Unit Total:</td>
+                        <td class="fw-bold">{{ sumField(lines, 'op') }}</td>
+                        <td class="fw-bold">{{ sumField(lines, 'hp') }}</td>
+                        <td class="fw-bold">{{ calcHpPerc(sumField(lines, 'op'), sumField(lines, 'hp')) }}%</td>
+                        <td class="fw-bold">{{ sumField(lines, 'op') + sumField(lines, 'hp') }}</td>
+
                         <td>-</td>
-                        <td class="text-primary fw-bold">{{ getUnitAvgEff(lines) }}%</td>
-                        <td colspan="8"></td>
+                        <td class="fw-bold">{{ sumField(lines, 'target') }}</td>
+                        <td class="fw-bold">{{ sumField(lines, 'actual') }}</td>
+                        <td class="fw-bold">{{ sumField(lines, 'actual') - sumField(lines, 'target') }}</td>
+                        <td class="fw-bold text-primary">{{ calcEff(sumField(lines, 'actual'), sumField(lines,
+                            'target')) }}%</td>
                     </tr>
                 </tbody>
 
-                <!-- Grand Totals (All Units Combined) -->
-                <tfoot class="sticky-footer bg-dark text-white">
+                <!-- Grand Total Footer -->
+                <tfoot class="sticky-footer">
                     <tr>
-                        <td colspan="5" class="text-end pe-3 fw-bold">Grand Total:</td>
+                        <td class="text-end">Grand Total:</td>
+                        <td>{{ grandTotals.op }}</td>
+                        <td>{{ grandTotals.hp }}</td>
+                        <td>{{ calcHpPerc(grandTotals.op, grandTotals.hp) }}%</td>
+                        <td>{{ grandTotals.op + grandTotals.hp }}</td>
+
+                        <td>-</td>
                         <td>{{ grandTotals.target }}</td>
                         <td>{{ grandTotals.actual }}</td>
                         <td>{{ grandTotals.actual - grandTotals.target }}</td>
-                        <td>-</td>
-                        <td>{{ grandTotals.avgEff }}%</td>
-                        <td colspan="8"></td>
+                        <td class="text-warning">{{ grandTotals.avgEff }}%</td>
                     </tr>
                 </tfoot>
             </table>
@@ -111,138 +96,98 @@
 </template>
 
 <script>
-import axios from 'axios'; // Ensure axios is installed
-
+import axios from 'axios';
 export default {
     data() {
         return {
             filterMonth: new Date().toISOString().substr(0, 7),
-            reportData: [], // Start with empty array
+            reportData: [],
             loading: false
         };
     },
     computed: {
-        // Automatically groups reportData whenever it is updated by the fetch
         unitGroups() {
             return this.reportData.reduce((groups, item) => {
-                const unit = item.unit_name || 'General';
+                const unit = item.unit_name || 'Others';
                 if (!groups[unit]) groups[unit] = [];
                 groups[unit].push(item);
                 return groups;
             }, {});
         },
         grandTotals() {
-            const target = this.reportData.reduce((s, l) => s + (Number(l.target) || 0), 0);
-            const actual = this.reportData.reduce((s, l) => s + (Number(l.actual) || 0), 0);
-            return {
-                target,
-                actual,
-                avgEff: target > 0 ? ((actual / target) * 100).toFixed(1) : 0
-            };
+            const target = this.reportData.reduce((s, l) => s + Number(l.target || 0), 0);
+            const actual = this.reportData.reduce((s, l) => s + Number(l.actual || 0), 0);
+            const op = this.reportData.reduce((s, l) => s + Number(l.op || 0), 0);
+            const hp = this.reportData.reduce((s, l) => s + Number(l.hp || 0), 0);
+            return { target, actual, op, hp, avgEff: target > 0 ? ((actual / target) * 100).toFixed(1) : 0 };
         }
     },
     methods: {
         async fetchReportData() {
-            this.loading = true;
             try {
-                // Adjust the URL to your actual backend endpoint
-                const response = await axios.get('/api/production-report', {
-                    params: { month: this.filterMonth }
-                });
-                this.reportData = response.data;
-            } catch (error) {
-                console.error("Error fetching report:", error);
-                alert("Failed to load data.");
-            } finally {
-                this.loading = false;
-            }
+                const res = await axios.get('/api/report/monthly', { params: { month: this.filterMonth } });
+                this.reportData = Array.isArray(res.data) ? res.data : [];
+            } catch (e) { console.error("Error:", e.response?.data?.error); }
         },
-        calcEff(line) {
-            if (!line.target || line.target <= 0) return 0;
-            return ((line.actual / line.target) * 100).toFixed(1);
+        calcEff(act, tar) { return tar > 0 ? ((act / tar) * 100).toFixed(1) : 0; },
+        calcHpPerc(op, hp) {
+            const total = Number(op || 0) + Number(hp || 0);
+            return total > 0 ? ((Number(hp || 0) / total) * 100).toFixed(1) : 0;
         },
-        getUnitTotal(lines, field) {
-            return lines.reduce((sum, line) => sum + (Number(line[field]) || 0), 0);
-        },
-        getUnitAvgEff(lines) {
-            const target = this.getUnitTotal(lines, 'target');
-            const actual = this.getUnitTotal(lines, 'actual');
-            return target > 0 ? ((actual / target) * 100).toFixed(1) : 0;
-        }
+        sumField(lines, field) { return lines.reduce((s, l) => s + Number(l[field] || 0), 0); }
     },
-    mounted() {
-        this.fetchReportData(); // Fetch data when page loads
-    }
+    mounted() { this.fetchReportData(); }
 }
-
 </script>
+
 <style scoped>
-/* 1. Ensure the container has a fixed height or overflow */
 .report-container {
-    max-height: 80vh;
-    /* Adjust based on your layout */
+    max-height: 75vh;
     overflow: auto;
-    position: relative;
+    border: 1px solid #dee2e6;
 }
 
-/* 2. Sticky Header Logic */
-.sticky-header {
+.table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.sticky-header th {
     position: sticky;
     top: 0;
-    z-index: 10;
-    /* Higher than sticky columns */
-    background-color: #fff;
-}
-
-/* For double-row headers, offset the second row */
-.header-row-1 th {
-    position: sticky;
-    top: 0;
-}
-
-/* Adjust the '40px' below to match the actual height of your first header row */
-.header-row-2 th {
-    position: sticky;
-    top: 40px;
-    z-index: 10;
-}
-
-/* 3. Sticky Footer Logic */
-.sticky-footer {
-    position: sticky;
-    bottom: 0;
-    z-index: 10;
-    background-color: #FF8C00 !important;
-    /* Matches bg-dark */
+    z-index: 20;
+    background-color: #212529 !important;
     color: white;
 }
 
-/* 4. Fix for borders during scroll */
-.sticky-header th,
-.sticky-footer td {
-    box-shadow: inset 0 1px 0 #dee2e6, inset 0 -1px 0 #dee2e6;
+.sticky-header tr.header-sub th {
+    top: 1px;
+    z-index: 10;
 }
 
-/* 5. Sticky Columns (Line No) */
-.sticky-col {
+.sticky-footer td {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    background-color: #212529 !important;
+    color: #ffc107 !important;
+    font-weight: bold;
+}
+
+.unit-row td {
+    background-color: #e3f2fd !important;
     position: sticky;
     left: 0;
-    background-color: #fff;
     z-index: 5;
 }
 
-/* Offset for multiple sticky columns if needed */
-.first-col {
-    left: 0;
-    z-index: 6;
-}
-
-.second-col {
-    left: 80px;
-    z-index: 5;
+.unit-total-row td {
+    background-color: #f8f9fa !important;
+    border-top: 2px solid #dee2e6;
 }
 
 .table>:not(caption)>*>* {
     padding: .1rem .1rem;
+
 }
 </style>
