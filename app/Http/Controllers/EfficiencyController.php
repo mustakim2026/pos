@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Efficiency;
 use App\Models\DailyProduction;
 use App\Models\DailyAttendance;
+use App\Models\Smv;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -29,7 +30,7 @@ class EfficiencyController extends Controller
     /**
      * Store a newly created resource in storage.
      */
- public function store(Request $request)
+public function store(Request $request)
 {
     $request->validate([
         'report_date' => 'required|date',
@@ -48,18 +49,43 @@ class EfficiencyController extends Controller
 
             foreach ($request->outputRows as $row) {
                 if (!empty($row['line_no'])) {
-                    // Save Production
+                    
+                    // 1. FETCH SMV from the 'smvs' reference table
+                    $smvValue = Smv::where([
+                        ['po_no', '=', $row['po_no']],
+                        ['style_model_no', '=', $row['style_model_no']],
+                        ['item', '=', $row['item']],
+                    ])->value('smv') ?? 0;
+
+                    // 2. CALCULATE Produce Minutes (smv * output)
+                    $output = $row['output'] ?? 0;
+                    $produceMinutes = $smvValue * $output;
+
+                    // 3. Save Production with SMV and Minutes
                     DailyProduction::create([
                         'efficiency_id'   => $efficiency->id,
                         'line_no'         => $row['line_no'],
                         'po_no'           => $row['po_no'],
                         'style_model_no'  => $row['style_model_no'],
                         'item'            => $row['item'] ?? '',
+                        'smv'             => $smvValue,        // Saved SMV
                         'target'          => $row['target'] ?? 0,
-                        'output'          => $row['output'] ?? 0,
+                        'output'          => $output,
+                        'produce_minutes' => $produceMinutes, // Calculated Value
                     ]);
 
-                    // Save Attendance (Using same $row)
+                    //  Attendance Calculation 
+                        $OP1      = $row['OP1'] ?? 0; // Use '=' not '=>'
+                        $Op_ad_m1 = $OP1 * 5 * 60;
+                        $OP2      = $row['OP2'] ?? 0;
+                        $Op_ad_m2 = $OP2 * 5 * 60;
+                        $OP3      = $row['OP3'] ?? 0;
+                        $Op_ad_m3 = $OP3 * 5 * 60;
+                        $OP4      = $row['OP4'] ?? 0;
+                        $Op_ad_m4 = $OP4 * 5 * 60;
+                        $HP1 = $row['HP1'] ?? 0;
+                        $hp_ad_m1=$HP1*5*60;
+
                     DailyAttendance::create([
                         'efficiency_id'  => $efficiency->id,
                         'line_no'        => $row['line_no'],
@@ -67,8 +93,12 @@ class EfficiencyController extends Controller
                         'style_model_no' => $row['style_model_no'],
                         'item'           => $row['item'] ?? '',
                         'allocated_Hrs'  => $row['allocated_Hrs'] ?? 0,
-                        'OP1' => $row['OP1'] ?? 0, 'HP1' => $row['HP1'] ?? 0,
-                        'OP2' => $row['OP2'] ?? 0, 'HP2' => $row['HP2'] ?? 0,
+                        'OP1'            => $OP1, 
+                        'Op_ad_m1'       =>$Op_ad_m1,
+                        'HP1'            => $HP1,
+                        'hp_ad_m1'       =>$hp_ad_m1,
+                        'OP2' => $row['OP2'] ?? 0, 
+                        'HP2' => $row['HP2'] ?? 0,
                         'OP3' => $row['OP3'] ?? 0, 'HP3' => $row['HP3'] ?? 0,
                         'OP4' => $row['OP4'] ?? 0, 'HP4' => $row['HP4'] ?? 0,
                         'OP5' => $row['OP5'] ?? 0, 'HP5' => $row['HP5'] ?? 0,
@@ -82,10 +112,9 @@ class EfficiencyController extends Controller
             return response()->json(['message' => 'Success'], 201);
         });
     } catch (\Exception $e) {
-        return response()->json(['error' => $e.getMessage()], 500);
+        return response()->json(['error' => $e->getMessage()], 500);
     }
 }
-
 
 
 

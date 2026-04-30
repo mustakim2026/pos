@@ -19,7 +19,9 @@ public function up(): void
         $table->string('style_model_no');
         $table->string('item');
         $table->integer('target')->default(0); // Added default to prevent errors
-        $table->integer('output')->default(0); // Added default to prevent errors
+        $table->integer('output')->default(0); 
+        $table->decimal('smv', 8, 2);
+        $table->decimal('produce_minutes', 8, 2); // Added default to prevent errors
         $table->string('remarks')->nullable();
         $table->timestamps();
     });

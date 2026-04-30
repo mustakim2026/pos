@@ -8,6 +8,7 @@ use App\Http\Controllers\ObserverController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\LineController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SmvController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -39,6 +40,10 @@ Route::controller(LineController::class)->prefix('lines')->group(function (){
 });
 Route::controller(ReportController::class)->prefix('report')->group(function (){
     Route::get('/monthly', 'getMonthlyReport'); 
+});
+
+Route::controller(SmvController::class)->prefix('smv')->group(function (){
+    Route::post('/add', 'store'); 
 });
 
 

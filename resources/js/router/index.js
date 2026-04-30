@@ -42,6 +42,16 @@ const routes = [
         name: "report",
         component: () => import("../components/EfficiencyReport/Report.vue"),
     },
+    {
+        path: "/others",
+        name: "others",
+        component: () => import("../components/companyProfile/others.vue"),
+    },
+    {
+        path: "/smv_library",
+        name: "smv_library",
+        component: () => import("../components/setting/smv_library..vue"),
+    },
 ]
 
 

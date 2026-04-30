@@ -10,7 +10,7 @@
 				<router-link class="btn btn-primary" :to="{ name: 'DailyEntryForm' }">Daily Efficiency
 					Report</router-link>
 				<router-link class="btn btn-primary" :to="{ name: 'LeftSidebar' }">Chat</router-link>
-				<router-link class="btn btn-primary" :to="{ name: 'observe' }">observe</router-link>
+				<router-link class="btn btn-primary" :to="{ name: 'others' }">others</router-link>
 			</div>
 		</div>
 		<div class="card-body">

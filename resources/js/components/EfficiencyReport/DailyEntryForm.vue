@@ -64,8 +64,10 @@
                             <th>PO No</th>
                             <th>Style</th>
                             <th>Item</th>
+
                             <th>Target</th>
                             <th>Output</th>
+
                             <th>Del</th>
                         </tr>
 
@@ -209,7 +211,7 @@ export default {
                 report_date: new Date().toISOString().substr(0, 10),
                 unit_id: '',
                 observer: '',
-                outputRows: [{ line_no: '', po_no: '', style_model_no: '', item: '', target: 0, output: 0, remarks: '' }],
+                outputRows: [{ line_no: '', po_no: '', style_model_no: '', item: '', smv: '', target: 0, output: 0, produce_minutes: 0, remarks: '' }],
                 attendanceRows: []
             }
         }
@@ -269,7 +271,7 @@ export default {
             };
         },
         addOutputRow() {
-            this.formData.outputRows.push({ line_no: '', po_no: '', style_model_no: '', item: '', target: 0, output: 0, remarks: '' });
+            this.formData.outputRows.push({ line_no: '', po_no: '', style_model_no: '', item: '', smv: '', target: 0, output: 0, produce_minutes: 0, remarks: '' });
         },
         removeRow(type, index) {
             if (this.formData[type].length > 1) this.formData[type].splice(index, 1);
@@ -285,7 +287,7 @@ export default {
                 report_date: new Date().toISOString().substr(0, 10),
                 unit_name: '',
                 observer: '',
-                outputRows: [{ line_no: '', po_no: '', style_model_no: '', item: '', target: 0, output: 0, remarks: '' }],
+                outputRows: [{ line_no: '', po_no: '', style_model_no: '', item: '', smv: '', target: 0, output: 0, produce_minutes: 0, remarks: '' }],
                 attendanceRows: []
             };
             this.lines = [];
@@ -373,34 +375,4 @@ export default {
 .rounded-pill {
     margin: 0 0 0 211px;
 }
-
-/* .table-container {
-    position: relative;
-    width: 100%;
-    background: white;
-} */
-
-/* .sticky-top {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-} */
-
-/* th[rowspan="2"]:nth-child(1),
-th[rowspan="2"]:nth-child(2) {
-    z-index: 12;
-
-} */
-
-/* .grid-input {
-    width: 50%;
-    border: none;
-    text-align: center;
-    padding: 0px;
-} */
-
-/* .grid-input:focus {
-    outline: 2px solid #007bff;
-    background: #fff;
-} */
 </style>

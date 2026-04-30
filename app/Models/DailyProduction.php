@@ -13,8 +13,10 @@ class DailyProduction extends Model
     'po_no', 
     'style_model_no', 
     'item', 
+    'smv',
     'target', 
     'output', 
+    'produce_minutes',
     'remarks'
 ];
 

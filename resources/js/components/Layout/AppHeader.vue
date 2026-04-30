@@ -9,9 +9,8 @@
                     aria-expanded="false">Setting</a>
                 <ul class="dropdown-menu">
                     <li><router-link class="dropdown-item" :to="{ name: 'observe' }">observe</router-link></li>
-                    <li><router-link class="dropdown-item" :to="{ name: 'unit' }">Unit</router-link>
-                    </li>
-                    <li><a class="dropdown-item" href="#">Something else here</a></li>
+                    <li><router-link class="dropdown-item" :to="{ name: 'unit' }">Unit</router-link></li>
+                    <li><router-link class="dropdown-item" :to="{ name: 'smv_library' }">SMV Library</router-link></li>
                     <li>
                         <hr class="dropdown-divider">
                     </li>

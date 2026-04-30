@@ -19,22 +19,38 @@ return new class extends Migration
             $table->string('style_model_no');
             $table->string('item');
             $table->integer('allocated_Hrs')->default(0);
-            $table->integer('OP1')->default(0);   // Before Lunch
-            $table->integer('HP1')->default(0);  // Before Lunch
-            $table->integer('OP2')->default(0);   // After Lunch
-            $table->integer('HP2')->default(0); 
-            $table->integer('OP3')->default(0);   // After Lunch
-            $table->integer('HP3')->default(0); 
-            $table->integer('OP4')->default(0);   // After Lunch
-            $table->integer('HP4')->default(0); 
-            $table->integer('OP5')->default(0);   // After Lunch
-            $table->integer('HP5')->default(0);  
-            $table->integer('OP6')->default(0);   // After Lunch
+            $table->integer('OP1')->default(0);
+            $table->decimal('Op_ad_m1', 8, 2);  // Before Lunch
+            $table->integer('HP1')->default(0);
+            $table->decimal('hp_ad_m1', 8, 2); // Before Lunch
+            $table->integer('OP2')->default(0); 
+            $table->decimal('Op_ad_m2', 8, 2);  // After Lunch
+            $table->integer('HP2')->default(0);
+            $table->decimal('hp_ad_m2', 8, 2);  
+            $table->integer('OP3')->default(0); 
+            $table->decimal('Op_ad_m3', 8, 2);  // After Lunch
+            $table->integer('HP3')->default(0);
+            $table->decimal('hp_ad_m3', 8, 2);  
+            $table->integer('OP4')->default(0);
+            $table->decimal('Op_ad_m4', 8, 2);  // After Lunch
+            $table->integer('HP4')->default(0);
+            $table->decimal('hp_ad_m4', 8, 2);  
+            $table->integer('OP5')->default(0);
+            $table->decimal('Op_ad_m5', 8, 2);   // After Lunch
+            $table->integer('HP5')->default(0);
+            $table->decimal('hp_ad_m5', 8, 2);   
+            $table->integer('OP6')->default(0);
+            $table->decimal('Op_ad_m6', 8, 2);  // After Lunch
             $table->integer('HP6')->default(0);
-            $table->integer('OP7')->default(0);   // After Lunch
+            $table->decimal('hp_ad_m6', 8, 2); 
+            $table->integer('OP7')->default(0);
+            $table->decimal('Op_ad_m7', 8, 2);   // After Lunch
             $table->integer('HP7')->default(0); 
-             $table->integer('OP8')->default(0);   // After Lunch
+            $table->decimal('hp_ad_m7', 8, 2); 
+            $table->integer('OP8')->default(0);
+            $table->decimal('Op_ad_m8', 8, 2);  // After Lunch
             $table->integer('HP8')->default(0);
+            $table->decimal('hp_ad_m8', 8, 2); 
             $table->integer('w_hrs')->default(0);  // After Lunch
             $table->timestamps();
         });
